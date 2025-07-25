@@ -1,0 +1,398 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+
+% Configuration de la page
+\geometry{left=2.5cm,right=2.5cm,top=3cm,bottom=3cm}
+
+% Configuration des couleurs
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% Configuration du code
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=C++
+}
+\lstset{style=mystyle}
+
+% Configuration des en-têtes et pieds de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Simulateur N-Corps Interactif}
+\fancyhead[R]{\leftmark}
+\fancyfoot[C]{\thepage}
+
+% Configuration des hyperliens
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Simulateur N-Corps Interactif},
+    pdfauthor={P-Pix},
+    pdfsubject={Documentation technique},
+    pdfkeywords={simulation, physique, C++, SDL2}
+}
+
+\title{
+    \vspace{-2cm}
+    \includegraphics[width=0.3\textwidth]{../asset/picture/logo.png}\\[1cm]
+    {\Huge \textbf{Simulateur N-Corps Interactif}}\\[0.5cm]
+    {\Large Documentation Technique et Guide Utilisateur}\\[0.3cm]
+    {\large Version 1.0}
+}
+
+\author{
+    \textbf{P-Pix}\\
+    \texttt{https://github.com/P-Pix}
+}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+\subsection{Présentation du projet}
+
+Le \textbf{Simulateur N-Corps Interactif} est une application de simulation physique développée en C++ qui modélise les interactions gravitationnelles entre plusieurs corps célestes. Ce projet combine la rigueur scientifique des algorithmes de simulation numérique avec une interface utilisateur moderne et intuitive.
+
+L'application utilise la bibliothèque graphique SDL2 pour offrir une expérience visuelle en temps réel, permettant à l'utilisateur d'observer l'évolution dynamique d'un système de corps soumis aux forces gravitationnelles muttuelles.
+
+\subsection{Objectifs}
+
+\begin{itemize}
+    \item \textbf{Éducatif} : Démonstrer les principes de la mécanique céleste et de la gravitation universelle
+    \item \textbf{Technique} : Implémenter des algorithmes numériques robustes pour la simulation physique
+    \item \textbf{Interactif} : Fournir une interface permettant l'exploration de différents scénarios
+    \item \textbf{Performance} : Optimiser les calculs pour des simulations fluides en temps réel
+\end{itemize}
+
+\subsection{Contexte scientifique}
+
+Le problème des N-corps est un problème classique en mécanique céleste qui consiste à prédire les mouvements individuels d'un groupe de corps célestes interagissant gravitationnellement. Alors que le problème à deux corps admet une solution analytique exacte, le cas général à N corps (N ≥ 3) ne peut être résolu que par des méthodes numériques.
+
+\section{Architecture du Système}
+
+\subsection{Vue d'ensemble}
+
+Le projet adopte une architecture \textbf{Model-View-Controller (MVC)} qui sépare clairement les responsabilités :
+
+\begin{itemize}
+    \item \textbf{Model} : Gestion des données et de la logique physique
+    \item \textbf{View} : Rendu graphique et interface utilisateur
+    \item \textbf{Controller} : Coordination entre le modèle et la vue
+\end{itemize}
+
+\subsection{Structure des fichiers}
+
+\begin{lstlisting}[language=bash, caption=Structure du projet]
+Probleme-N-Corps/
+├── src/                    # Code source principal
+│   ├── main.cpp           # Point d'entrée de l'application
+│   ├── controller/
+│   │   └── Application.cpp # Contrôleur principal
+│   ├── model/
+│   │   ├── Body.cpp       # Modèle des corps célestes
+│   │   └── Simulation.cpp # Moteur de simulation
+│   └── view/
+│       ├── ConfigWindow.cpp # Interface de configuration
+│       └── Renderer.cpp   # Moteur de rendu
+├── include/               # Fichiers d'en-tête
+├── bin/                   # Fichiers objets compilés
+├── test/                  # Tests unitaires
+├── asset/                 # Ressources multimédia
+├── doc/                   # Documentation
+└── Makefile              # Configuration de compilation
+\end{lstlisting}
+
+\subsection{Diagramme de classes}
+
+Le diagramme suivant illustre les relations entre les principales classes du système :
+
+\begin{figure}[h]
+\centering
+\begin{minipage}{0.8\textwidth}
+\begin{verbatim}
+    Application
+        |
+        +-- ConfigWindow
+        |
+        +-- Simulation
+        |      |
+        |      +-- Body (*)
+        |
+        +-- Renderer
+\end{verbatim}
+\end{minipage}
+\caption{Architecture simplifiée du système}
+\end{figure}
+
+\section{Modèle Physique}
+
+\subsection{Loi de la gravitation universelle}
+
+La simulation repose sur la loi de Newton de la gravitation universelle :
+
+\begin{equation}
+\vec{F}_{ij} = -G \frac{m_i m_j}{|\vec{r}_{ij}|^3} \vec{r}_{ij}
+\end{equation}
+
+où :
+\begin{itemize}
+    \item $\vec{F}_{ij}$ est la force exercée par le corps $j$ sur le corps $i$
+    \item $G$ est la constante gravitationnelle
+    \item $m_i, m_j$ sont les masses des corps
+    \item $\vec{r}_{ij} = \vec{r}_i - \vec{r}_j$ est le vecteur position relatif
+\end{itemize}
+
+\subsection{Intégration numérique}
+
+L'algorithme d'intégration de Verlet est utilisé pour sa stabilité et sa conservation de l'énergie :
+
+\begin{align}
+\vec{r}_{n+1} &= 2\vec{r}_n - \vec{r}_{n-1} + \vec{a}_n \Delta t^2\\
+\vec{v}_n &= \frac{\vec{r}_{n+1} - \vec{r}_{n-1}}{2\Delta t}
+\end{align}
+
+\subsection{Optimisations}
+
+\begin{itemize}
+    \item \textbf{Prévention des singularités} : Limitation de la distance minimale
+    \item \textbf{Calcul vectoriel} : Utilisation de structures optimisées
+    \item \textbf{Pas de temps adaptatif} : Contrôle de la précision numérique
+\end{itemize}
+
+\section{Interface Utilisateur}
+
+\subsection{Fenêtre de configuration}
+
+L'interface de configuration permet de :
+
+\begin{itemize}
+    \item Sélectionner des préréglages prédéfinis
+    \item Configurer manuellement les paramètres
+    \item Valider les entrées utilisateur
+    \item Prévisualiser les configurations
+\end{itemize}
+
+\subsection{Préréglages disponibles}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|l|}
+\hline
+\textbf{Préréglage} & \textbf{Corps} & \textbf{Gravité} & \textbf{Description} \\
+\hline
+Système Solaire & 9 & 100.0 & Simulation planétaire classique \\
+Étoiles Binaires & 2 & 200.0 & Système d'étoiles doubles \\
+Corps Aléatoires & 15 & 50.0 & Distribution stochastique \\
+Galaxies & 50 & 25.0 & Formation de structures galactiques \\
+\hline
+\end{tabular}
+\caption{Préréglages de simulation disponibles}
+\end{table}
+
+\subsection{Contrôles en temps réel}
+
+\begin{itemize}
+    \item \textbf{Zoom} : Molette de souris
+    \item \textbf{Vitesse} : Touches \texttt{+} et \texttt{-}
+    \item \textbf{Pause/Reprise} : Barre d'espace
+    \item \textbf{Réinitialisation} : Touche \texttt{R}
+\end{itemize}
+
+\section{Implémentation Technique}
+
+\subsection{Technologies utilisées}
+
+\begin{itemize}
+    \item \textbf{Langage} : C++11
+    \item \textbf{Graphiques} : SDL2, SDL2\_ttf
+    \item \textbf{Build} : GNU Make
+    \item \textbf{Documentation} : Doxygen, LaTeX
+\end{itemize}
+
+\subsection{Exemple de code}
+
+\begin{lstlisting}[caption=Calcul des forces gravitationnelles]
+void Simulation::updateForces() {
+    // Réinitialiser les forces
+    for (auto& body : bodies) {
+        body.resetForce();
+    }
+    
+    // Calculer les forces par paires
+    for (size_t i = 0; i < bodies.size(); ++i) {
+        for (size_t j = i + 1; j < bodies.size(); ++j) {
+            Vector2D force = calculateGravitationalForce(
+                bodies[i], bodies[j]
+            );
+            
+            bodies[i].addForce(force);
+            bodies[j].addForce(-force);
+        }
+    }
+}
+\end{lstlisting}
+
+\subsection{Gestion des performances}
+
+La complexité algorithmique de $O(n^2)$ pour n corps nécessite des optimisations :
+
+\begin{itemize}
+    \item \textbf{Calculs vectoriels optimisés}
+    \item \textbf{Réduction des allocations mémoire}
+    \item \textbf{Rendu adaptatif selon la charge}
+\end{itemize}
+
+\section{Installation et Compilation}
+
+\subsection{Prérequis système}
+
+\begin{itemize}
+    \item \textbf{OS} : Linux (Ubuntu/Debian recommandé)
+    \item \textbf{Compilateur} : GCC avec support C++11
+    \item \textbf{Bibliothèques} : SDL2, SDL2\_ttf
+    \item \textbf{Outils} : Make, pkg-config
+\end{itemize}
+
+\subsection{Installation des dépendances}
+
+\begin{lstlisting}[language=bash, caption=Installation Ubuntu/Debian]
+sudo apt-get update
+sudo apt-get install \
+    build-essential \
+    libsdl2-dev \
+    libsdl2-ttf-dev \
+    pkg-config
+\end{lstlisting}
+
+\subsection{Compilation}
+
+\begin{lstlisting}[language=bash, caption=Processus de compilation]
+# Cloner le dépôt
+git clone https://github.com/P-Pix/Probleme-N-Corps.git
+cd Probleme-N-Corps
+
+# Compiler le projet
+make all
+
+# Exécuter la simulation
+./N-Corps
+\end{lstlisting}
+
+\section{Tests et Validation}
+
+\subsection{Tests unitaires}
+
+\begin{lstlisting}[language=bash, caption=Exécution des tests]
+make test           # Tests unitaires complets
+make demo          # Démonstration sans interface
+make test-features # Tests des fonctionnalités
+\end{lstlisting}
+
+\subsection{Validation physique}
+
+\begin{itemize}
+    \item \textbf{Conservation de l'énergie} : Vérification sur des orbites fermées
+    \item \textbf{Stabilité numérique} : Tests de convergence
+    \item \textbf{Cas limites} : Validation sur des configurations connues
+\end{itemize}
+
+\section{Guide d'Utilisation}
+
+\subsection{Démarrage rapide}
+
+\begin{enumerate}
+    \item Lancez l'application : \texttt{./N-Corps}
+    \item Sélectionnez un préréglage ou configurez manuellement
+    \item Cliquez sur "Démarrer" pour lancer la simulation
+    \item Utilisez les contrôles pour explorer la simulation
+\end{enumerate}
+
+\subsection{Configuration avancée}
+
+\begin{itemize}
+    \item \textbf{Nombre de corps} : 1 à 100 (recommandé : 10-20)
+    \item \textbf{Constante gravitationnelle} : 0.1 à 1000.0
+    \item \textbf{Pas de temps} : 0.001 à 0.1 (plus petit = plus précis)
+\end{itemize}
+
+\section{Perspectives d'Évolution}
+
+\subsection{Améliorations possibles}
+
+\begin{itemize}
+    \item \textbf{Algorithmes avancés} : Barnes-Hut, Fast Multipole Method
+    \item \textbf{Parallélisation} : Support multi-threading
+    \item \textbf{Rendu 3D} : Extension vers OpenGL
+    \item \textbf{Sauvegarde} : Export des simulations
+\end{itemize}
+
+\subsection{Optimisations futures}
+
+\begin{itemize}
+    \item \textbf{GPU Computing} : Calculs sur cartes graphiques
+    \item \textbf{Adaptive timestep} : Pas de temps variable
+    \item \textbf{Collision detection} : Gestion des collisions réalistes
+\end{itemize}
+
+\section{Conclusion}
+
+Le Simulateur N-Corps Interactif démontre avec succès l'implémentation d'un système de simulation physique robuste et performant. L'architecture modulaire facilite la maintenance et l'extension du code, tandis que l'interface utilisateur intuitive rend la simulation accessible à un large public.
+
+Ce projet constitue une base solide pour l'exploration de phénomènes gravitationnels complexes et peut servir de référence pour des développements futurs dans le domaine de la simulation numérique.
+
+\appendix
+
+\section{Références}
+
+\begin{itemize}
+    \item Goldstein, H. \textit{Classical Mechanics}. Addison-Wesley, 3ème édition
+    \item Press, W. H. et al. \textit{Numerical Recipes in C++}. Cambridge University Press
+    \item Documentation SDL2 : \url{https://www.libsdl.org/}
+    \item Algorithmes de simulation : \url{https://en.wikipedia.org/wiki/N-body_simulation}
+\end{itemize}
+
+\section{Licence}
+
+Ce projet est distribué sous licence MIT. Voir le fichier \texttt{LICENSE} pour les détails complets.
+
+\end{document}

@@ -14,7 +14,7 @@ YELLOW='\033[0;33m'
 .DEFAULT_GOAL := help
 
 # for all file .cpp in the directory src/
-SRC	= $(wildcard src/*.cpp src/contoller/*.cpp src/model/*.cpp src/view/*.cpp)
+SRC	= $(wildcard src/*.cpp src/controller/*.cpp src/model/*.cpp src/view/*.cpp)
 
 # Transform all file .cpp in the directory src/ in file .o
 OBJ	= $(SRC:.cpp=.o)
@@ -28,13 +28,13 @@ CC = g++
 # Name Executable
 NAME = N-Corps
 CFLAGS =
-CXXFLAGS = -Wall -Wextra -Werror -std=c++11 -pthread -lsfml-system -lsfml-window -lsfml-graphics
-LDFLAGS	=
+CXXFLAGS = -Wall -Wextra -Werror -std=c++11 -pthread $(shell pkg-config --cflags sdl2 SDL2_ttf)
+LDFLAGS	= $(shell pkg-config --libs sdl2 SDL2_ttf)
 
 all: $(NAME) clean ## Compile link and clean all .o file
 
 $(NAME): $(OBJ) ## Compile and link
-	$(CC) $(CXXFLAGS) $(LDFLAGS) $(COMPILE_OBJ) -o $(NAME)
+	$(CC) $(CXXFLAGS) $(COMPILE_OBJ) -o $(NAME) $(LDFLAGS)
 
 run: ## Execute the executable
 	@./$(NAME)
@@ -54,6 +54,27 @@ clean:	## Vide les fichiers .o et le fichier executable
 
 mrproper: clean  ## Vide les fichiers .o et le fichier executable
 	@rm -rf $(NAME)
+
+demo: ## Run physics demonstration (no graphics)
+	@echo -e $(CYAN)"Compilation de la démonstration..."$(NC)
+	g++ $(CXXFLAGS) -I./include demo/demo_simulation.cpp src/model/Body.cpp src/model/Simulation.cpp -o demo_runner
+	@echo -e $(GREEN)"Exécution de la démonstration..."$(NC)
+	./demo_runner
+	@rm -f demo_runner
+
+test: ## Run unit tests
+	@echo -e $(CYAN)"Compilation des tests..."$(NC)
+	g++ $(CXXFLAGS) -I./include test/test_simulation.cpp src/model/Body.cpp src/model/Simulation.cpp -o test_runner
+	@echo -e $(GREEN)"Exécution des tests..."$(NC)
+	./test_runner
+	@rm -f test_runner
+
+test-features: ## Test new interactive features
+	@echo -e $(CYAN)"Test des nouvelles fonctionnalités..."$(NC)
+	g++ $(CXXFLAGS) -I./include test/test_features.cpp src/controller/Application.cpp src/view/ConfigWindow.cpp src/view/Renderer.cpp src/model/Body.cpp src/model/Simulation.cpp -o test_features $(LDFLAGS)
+	@echo -e $(GREEN)"Exécution des tests de fonctionnalités..."$(NC)
+	./test_features
+	@rm -f test_features
 
 init: ## Create the directory bin/ and obj/
 	@mkdir -p bin bin/src/model bin/src/view bin/src/controller

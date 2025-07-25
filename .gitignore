@@ -30,3 +30,47 @@
 *.exe
 *.out
 *.app
+
+# Build directories
+bin/
+build/
+
+# LaTeX temporary files
+*.aux
+*.log
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.nav
+*.snm
+*.vrb
+
+# Generated documentation (keep source files only)
+doc/doxygen/
+doc/*.pdf
+doc/*.aux
+doc/*.log
+doc/*.out
+doc/*.toc
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*.tmp
